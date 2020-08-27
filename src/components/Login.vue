@@ -13,7 +13,8 @@
         </el-form-item>
         <!-- 密码 -->
         <el-form-item prop="password">
-          <el-input prefix-icon="iconfont icon-3702mima" show-password v-model="loginForm.password" ></el-input>
+          <el-input prefix-icon="iconfont icon-3702mima" show-password v-model="loginForm.password"
+                    @keyup.enter.native="login"></el-input>
         </el-form-item>
         <!-- 按钮 -->
         <el-form-item class="btns">
@@ -39,7 +40,7 @@ export default {
       loginRules: {
         username: [
           { required: true, message: '请输入用户名', trigger: 'blur' },
-          { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }
+          { min: 3, max: 32, message: '长度在 3 到 32 个字符', trigger: 'blur' }
         ],
         password: [
           { required: true, message: '请输入密码', trigger: 'blur' },
@@ -63,14 +64,15 @@ export default {
         }
         // 不加await返回的是promise对象。await只能使用在被async修饰的方法中
         // 结构赋值。将请求返回的对象的data属性取出来，并赋值给result
-        const { data: result } = await this.$http.post('login', this.loginForm);
-        if (result.meta.status !== 200) {
-          return this.$message.error('登录失败');
+        const { data: res } = await this.$http.post('login', this.loginForm);
+        if (res.meta.status === 200) {
+          this.$message.success(res.meta.msg);
+          window.sessionStorage.setItem('token', res.data.token);
+          // 注意是$router，而不是$route
+          await this.$router.push('/home');
+        } else {
+          this.$message.error(res.meta.msg);
         }
-        this.$message.success('登录成功');
-        window.sessionStorage.setItem('token', result.data.token);
-        // 注意是$router，而不是$route
-        await this.$router.push('/home');
       });
     }
   }
