@@ -11,7 +11,7 @@ import axios from 'axios'
 import { Message } from 'element-ui'
 
 // 配置api的根路径
-axios.defaults.baseURL = 'https://www.liulongbin.top:8888/api/private/v1/'
+axios.defaults.baseURL = 'http://www.ysqorz.top:8888/api/private/v1/'
 // 在挂载之前，注册请求拦截器，往请求头中注入token
 axios.interceptors.request.use(config => {
   // console.log(config);

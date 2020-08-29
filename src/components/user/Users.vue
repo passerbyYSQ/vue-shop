@@ -53,7 +53,7 @@
 
               <!-- 分配角色按钮 -->
               <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
-                <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+                <el-button type="warning" @click="showAllotRoleDialog(scope.row)" icon="el-icon-setting" size="mini"></el-button>
               </el-tooltip>
             </template>
           </el-table-column>
@@ -63,7 +63,7 @@
         <el-pagination
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-          :current-page="queryInfo.pagenum"
+          :current-page.sync="queryInfo.pagenum"
           :page-sizes="[1, 2, 5, 8, 10]"
           :page-size="queryInfo.pagesize"
           layout="total, sizes, prev, pager, next, jumper"
@@ -124,6 +124,30 @@
         <el-button type="primary" @click="editUserInfo" size="medium">确 定</el-button>
       </span>
     </el-dialog>
+
+    <el-dialog
+      title="分配角色"
+      :visible.sync="allotRoleDialogVisible"
+      width="36%" @close="allotRoleDialogClosed">
+      <div>
+        <p>当前用户：{{ userInfo.username }}</p>
+        <p>当前的角色：{{ userInfo.role_name }}</p>
+        <p>分配新角色：
+          <el-select v-model="selectedRoleId" clearable placeholder="请选择">
+            <el-option
+              v-for="role in roleList"
+              :key="role.id"
+              :label="role.roleName"
+              :value="role.id">
+            </el-option>
+          </el-select>
+        </p>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="allotRoleDialogVisible = false" size="medium">取 消</el-button>
+        <el-button type="primary" @click="allotRole" size="medium">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -164,9 +188,11 @@
           ]
         },
         editDialogVisible: false, // 编辑对话框是否显示
-        editForm: { // 编辑表单的数据
-
-        }
+        editForm: {}, // 编辑表单的数据
+        allotRoleDialogVisible: false, //分配角色对话框是否可见
+        userInfo: {}, // 需要被分配角色的用户信息
+        roleList: [], // 角色列表
+        selectedRoleId: '', // 已选中的新角色的id值
       }
     },
     created () {
@@ -286,19 +312,46 @@
         } else {
           this.$message.error(res.meta.msg);
         }
+      },
+      // 显示分配角色的对话框
+      async showAllotRoleDialog(userInfo) {
+        this.userInfo = userInfo;
+
+        // 获取角色列表
+        const { data: res } = await this.$http.get('roles');
+        if (res.meta.status !== 200) {
+          this.$message.error(res.meta.msg);
+        }
+        this.roleList = res.data;
+
+        this.allotRoleDialogVisible = true;
+      },
+      // 点击分配角色
+      async allotRole() {
+        if (!this.selectedRoleId) {
+          return this.$message.error('请选择角色');
+        }
+        const { data: res } = await this.$http.put(`users/${this.userInfo.id}/role`, { rid: this.selectedRoleId });
+        if (res.meta.status !== 200) {
+          return this.$message.error(res.meta.msg);
+        }
+
+        this.$message.success(res.meta.msg);
+        this.allotRoleDialogVisible = false;
+        this.getUserList();
+      },
+      // 分配角色的对话框关闭的回调
+      allotRoleDialogClosed() {
+        this.selectedRoleId = '';
+        this.userInfo = {};
       }
     }
   }
 </script>
 
 <style lang="less" scoped>
-  .el-card {
-    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15) !important;
-  }
 
-  .el-table {
-    margin-top: 16px;
-  }
+
 
   .el-pagination {
     margin-top: 16px;
