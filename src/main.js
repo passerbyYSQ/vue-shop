@@ -8,7 +8,8 @@ import './assets/css/global.css'
 import './assets/fonts/iconfont.css'
 // 导入axios作网络请求
 import axios from 'axios'
-import { Message } from 'element-ui'
+// 导入树形表格组件
+import TreeTable from 'vue-table-with-tree-grid'
 
 // 配置api的根路径
 axios.defaults.baseURL = 'http://www.ysqorz.top:8888/api/private/v1/'
@@ -35,6 +36,8 @@ axios.interceptors.request.use(config => {
 // 挂载到vue中，替换vue原本的网络请求工具
 Vue.prototype.$http = axios
 Vue.config.productionTip = false
+
+Vue.component('tree-table', TreeTable)
 
 new Vue({
   router,

@@ -18,8 +18,8 @@
           <el-col :span="6">
             <!-- 搜索 -->
             <el-input placeholder="请输入内容" v-model="queryInfo.query"
-                      @keyup.enter.native="getUserList" clearable @clear="getUserList">
-              <el-button slot="append" icon="el-icon-search" @click="getUserList"></el-button>
+                      @keyup.enter.native="onSearch" clearable @clear="onSearch">
+              <el-button slot="append" icon="el-icon-search" @click="onSearch"></el-button>
             </el-input>
           </el-col>
         </el-row>
@@ -59,15 +59,17 @@
           </el-table-column>
         </el-table>
 
-        <!-- 分页 -->
+        <!-- 分页
+        :page-sizes="[1, 2, 5, 8, 10]"
+        @size-change="handleSizeChange"-->
         <el-pagination
-          @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
+          @size-change="handleSizeChange"
           :current-page.sync="queryInfo.pagenum"
-          :page-sizes="[1, 2, 5, 8, 10]"
+          :page-sizes="[1, 2, 3, 4]"
           :page-size="queryInfo.pagesize"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="total">
+          :total="total" background>
         </el-pagination>
       </div>
     </el-card>
@@ -158,9 +160,9 @@
       return {
         // 获取用户列表的请求参数
         queryInfo: {
-          query: '',
-          pagenum: 1, // 当前页
-          pagesize: 2 // 每页多少条数据
+          query: this.$route.query.query ? this.$route.query.query : '',
+          pagenum: this.$route.query.page ? parseInt(this.$route.query.page) : 1, // 当前页
+          pagesize: this.$route.query.size ? parseInt(this.$route.query.size) : 1 // 每页多少条数据
         },
         userList: [],
         total: 0, // 总记录数
@@ -199,6 +201,22 @@
       this.getUserList();
     },
     methods: {
+      onSearch() {
+        // 路径拼接参数 关键字参数，这样刷新不会丢失
+        const route = {
+          path: this.$route.path,
+          query: {
+            page: 1, // 数据来源是第一页
+            size: this.queryInfo.pagesize
+          }
+        };
+        if (this.queryInfo.query) {
+          route.query.query = this.queryInfo.query;
+        }
+        this.queryInfo.pagenum = 1; // 为了让pager回到第1。不能少！！！
+        this.$router.replace(route);
+        this.getUserList();
+      },
       // 获取用户列表
       async getUserList () {
         console.log(this.queryInfo)
@@ -209,15 +227,37 @@
           this.total = res.data.total;
         }
       },
-      // 当pageSize（每页显示的条数）改变时
-      handleSizeChange (newSize) {
-        this.queryInfo.pagesize = newSize;
-        this.getUserList();
-      },
       // 当前页改变
       handleCurrentChange (newPage) {
-        // console.log(newPage);
+        // 路径拼接参数
+        const route = {
+          path: this.$route.path,
+          query: {
+            page: newPage,
+            size: this.queryInfo.pagenum
+          }
+        };
+        if (this.queryInfo.query) {
+          route.query.query = this.queryInfo.query;
+        }
         this.queryInfo.pagenum = newPage;
+        this.$router.replace(route);
+        this.getUserList();
+      },
+      handleSizeChange(newSize) {
+        // 路径拼接参数
+        const route = {
+          path: this.$route.path,
+          query: {
+            page: this.queryInfo.pagenum,
+            size: newSize
+          }
+        };
+        if (this.queryInfo.query) {
+          route.query.query = this.queryInfo.query;
+        }
+        this.queryInfo.pagenum = 1; // pager指向第一页
+        this.$router.replace(route);
         this.getUserList();
       },
       // switch状态改变
@@ -351,14 +391,5 @@
 
 <style lang="less" scoped>
 
-
-
-  .el-pagination {
-    margin-top: 16px;
-    // 浮动会有问题，底部margin消失
-    /*float: right;*/
-    display: flex;
-    justify-content: flex-end;
-  }
 
 </style>
