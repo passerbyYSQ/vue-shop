@@ -254,4 +254,7 @@
   .margin-top-16 {
     margin-top: 16px;
   }
+  .el-cascader {
+    width: 100%;
+  }
 </style>
