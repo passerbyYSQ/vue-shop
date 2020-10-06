@@ -207,7 +207,7 @@
         }
 
         res.data.forEach(item => {
-          item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : [];
+          item.attr_vals = item.attr_vals ? item.attr_vals.split(',') : [];
           item.tagInputVisible = false; // 增加tag的按钮和文本框的切换
           item.tagInputValue = ''; // 即将新增的tag的名称
         });
@@ -298,10 +298,9 @@
       async handleTagInputConfirm(row) {
         if (row.tagInputValue.trim().length !== 0) {
           // 由于空格用作分隔符，所以属性值不允许有空格
-          row.attr_vals.push(row.tagInputValue.replace(/\s/ig,''));
+          row.attr_vals.push(row.tagInputValue.replace(/\s+/ig,''));
+          this.saveAttrVals(row);
         }
-
-        this.saveAttrVals(row);
         row.tagInputValue = '';
         row.tagInputVisible = false;
       },
@@ -354,9 +353,6 @@
 </script>
 
 <style lang="less" scoped>
-  .el-cascader {
-    width: 300px;
-  }
   .el-tag {
     margin-right: 16px;
     margin-bottom: 8px;

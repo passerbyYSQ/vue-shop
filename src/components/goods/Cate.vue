@@ -81,9 +81,9 @@
           </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
-        <el-button @click="addCateDialogVisible = false" size="medium">取 消</el-button>
-        <el-button type="primary" @click="addCate" size="medium">确 定</el-button>
-      </span>
+          <el-button @click="addCateDialogVisible = false" size="medium">取 消</el-button>
+          <el-button type="primary" @click="addCate" size="medium">确 定</el-button>
+        </span>
       </el-dialog>
     </el-card>
   </div>

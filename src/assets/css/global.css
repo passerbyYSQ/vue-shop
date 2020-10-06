@@ -18,7 +18,21 @@ html, body, #app {
     justify-content: flex-end;
 }
 
-.el-cascader-panel{
+.el-cascader {
+    width: 300px;
+}
+.el-cascader-panel {
     height: 200px;
+}
+
+.el-steps {
+    margin: 24px 0;
+}
+.el-step__title {
+    font-size: 14px;
+}
+
+.ql-editor {
+    min-height: 320px;
 }
 
